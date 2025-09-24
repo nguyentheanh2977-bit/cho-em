@@ -1,1 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tin nhắn cho em</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f9f9f9;
+      font-family: "Segoe UI", sans-serif;
+      padding: 20px;
+      text-align: center;
+      overflow: hidden;
+    }
+    #messageBox {
+      max-width: 600px;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 2;
+    }
+    #text {
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+    button {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #ff4757;
+    }
+    #tinyLink {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-size: 10px;
+      opacity: 0.7;
+      z-index: 2;
+    }
+    #tinyLink a {
+      text-decoration: none;
+      color: black;
+      cursor: pointer;
+    }
+    #tinyLink a:hover {
+      text-decoration: underline;
+    }
+    #thankYou {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff3366;
+      display: none;
+      z-index: 3;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="messageBox">
+    <div id="text"></div>
+    <button id="nextBtn">Tiếp tục</button>
+  </div>
+
+  <div id="tinyLink">
+    <a id="loveLink">nếu em còn muốn tớ ở lại thì nhấn vào đây</a>
+  </div>
+
+  <div id="thankYou">tớ cảm ơn em bé rất nhiều ạ, yêu em bé lắmmm moaz moaz ❤️</div>
+  <canvas id="fireworks"></canvas>
+
+  <script>
+    const messages = [
+      "hi baby,",
+      "từ từ, đừng thoát ra, em nghe tớ nói đã.",
+      "tớ cũng tệ thật, làm em buồn nhiều quá.",
+      "nói chuyện thì không tinh tế, cũng chẳng biết cách dỗ dành em.",
+      "lần nào cũng chỉ biết nói xin lỗi, lại còn không thể gặp em thường xuyên nữa.",
+      "chắc hẳn ở bên tớ em cảm thấy tủi thân nhiều lắm.",
+      "",
+      "thôi thì, lần này tớ lại xin lỗi vậy.",
+      "tớ không biết mình nên rời đi hay là nên ở lại.",
+      "tớ còn yêu em lắm, nhưng mà, tớ sợ rằng, nếu tớ ở lại sẽ làm em buồn thêm.",
+      "nhưng tớ cũng chẳng muốn rời đi, thì đâu có ai muốn từ bỏ người mình yêu đâu, nhỉ?",
+      "",
+      "mỗi lần em dỗi tớ, tớ lại nghĩ đến lúc em cười.",
+      "em cười xinh lắm, nhìn mà muốn nựng mấy cái luôn.",
+      "tớ cảm ơn em vì đã bao dung với tớ, bao dung cho sự thô kệch, thiếu tinh tế của tớ.",
+      "tớ cảm ơn em nhiều lắm.",
+      "",
+      "nhìn thấy em mệt mỏi như vậy, tớ cũng không nỡ ở lại để làm khổ em thêm.",
+      "bông hoa nhỏ của tớ đáng yêu lắm, hãy cười thật nhiều, phải vui hơn nhé.",
+      "tớ cảm ơn em vì tất cả mọi thứ em đã làm cho tớ.",
+      "bạn nhỏ yên tâm, tớ sẽ không khóc đâu.",
+      "chúc em sau này luốn vui vẻ, hạnh phúc với lựa chọn của bản thân nhé.",
+      "anh yêu em."
+    ];
+
+    let index = 0;
+    const textEl = document.getElementById("text");
+    const nextBtn = document.getElementById("nextBtn");
+    const thankYou = document.getElementById("thankYou");
+    const canvas = document.getElementById("fireworks");
+    const ctx = canvas.getContext("2d");
+
+    nextBtn.addEventListener("click", () => {
+      if (index < messages.length) {
+        textEl.textContent = messages[index];
+        index++;
+      } else {
+        textEl.textContent = "Hết rồi... ❤️";
+        nextBtn.style.display = "none";
+      }
+    });
+
+    // Fireworks animation
+    let particles = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function createFirework(x, y) {
+      const count = 100;
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          angle: Math.random() * 2 * Math.PI,
+          speed: Math.random() * 5 + 2,
+          life: 100,
+          alpha: 1
+        });
+      }
+    }
+
+    function updateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed;
+        p.life--;
+        p.alpha = p.life / 100;
+        ctx.fillStyle = `rgba(255, ${Math.random()*255}, ${Math.random()*255}, ${p.alpha})`;
+        ctx.fillRect(p.x, p.y, 2, 2);
+        if (p.life <= 0) particles.splice(i, 1);
+      });
+      if (particles.length > 0) {
+        requestAnimationFrame(updateParticles);
+      }
+    }
+
+    document.getElementById("loveLink").addEventListener("click", () => {
+      thankYou.style.display = "block";
+      canvas.style.display = "block";
+      createFirework(canvas.width / 2, canvas.height / 2);
+      updateParticles();
+
+      setTimeout(() => {
+        window.location.href = "https://www.instagram.com/_calcifer.ahn_/?__pwa=1";
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
 
